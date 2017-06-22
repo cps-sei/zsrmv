@@ -1,0 +1,9 @@
+prefix=/home/dionisio/git/stac/zsrmvmodule
+includedir=${prefix}
+libdir=${prefix}/lib
+
+Name: zsrmv
+Description: Static library to use zsrmv scheduler
+Version: 1.0.0
+Cflags: -I${includedir}
+Libs: -L${libdir} -lzsv -lrt -lpthread
