@@ -37,6 +37,13 @@
 #
 #DM-0000891
 
+
+#CROSS_COMPILE=../../../toolchain/arm-2009q1/bin/arm-none-linux-gnueabi-
+#CC=$(CROSS_COMPILE)gcc
+#AR=$(CROSS_COMPILE)ar
+#LD=$(CROSS_COMPILE)ld
+#AS=$(CROSS_COMPILE)as
+
 CC=gcc
 AR=ar
 LD=ld
@@ -45,10 +52,13 @@ AS=as
 all:	libzsv.a
 
 clean:
-	rm -f libzsv.a libzsv.o
+	rm -f libzsv.a libzsv.o admission.o
 
-libzsv.o:	libzsv.c 
+libzsv.o:	libzsv.c #../zsrm.h
 	$(CC) -fPIC -c libzsv.c -o libzsv.o
 
-libzsv.a:	libzsv.o
-	$(AR) -rcs libzsv.a libzsv.o
+admission.o:	../admission.c
+	$(CC) -fPIC -c ../admission.c -o admission.o
+
+libzsv.a:	libzsv.o admission.o
+	$(AR) -rcs libzsv.a libzsv.o admission.o

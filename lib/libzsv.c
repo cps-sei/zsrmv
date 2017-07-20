@@ -12,6 +12,7 @@
 #include <string.h>
 #include <pthread.h>
 
+#include "../zsrmv.h"
 #include "../zsrmvapi.h"
 
 #include <unistd.h>
@@ -172,6 +173,78 @@ void busy_timestamped(long millis, unsigned long long tsbuffer[],
       }
   //#endif // DD: Commented out
 }
+
+
+int zsv_is_admissible(struct reserve_spec_t *reserves_specs_table, int tablesize)
+{
+  struct reserve *rtable;
+  int i,j,t;
+  int *dec_crit_indices;
+  int admissible;
+  unsigned long long Z;
+
+  // allocate resources
+  dec_crit_indices = malloc(sizeof(int)*tablesize);
+  if (dec_crit_indices == NULL){
+    printf("failed to allocate memory for reordering table\n");
+    return -1;
+  }
+
+  rtable = malloc(sizeof(struct reserve)*tablesize);
+  if (rtable == NULL){
+    printf("failed to allocate temporal reserve table\n");
+    return -2;
+  }
+
+  // create decreasing criticality order
+
+  // create direct mapping first
+  for (i=0;i<tablesize;i++){
+    dec_crit_indices[i]=i;
+  }
+
+  // indirect buble sort
+  for (i=0;i<tablesize;i++){
+    for (j=i+1;j<tablesize;j++){
+      if (reserves_specs_table[dec_crit_indices[i]].criticality <reserves_specs_table[dec_crit_indices[j]].criticality){
+	t=dec_crit_indices[i];
+	dec_crit_indices[i]=dec_crit_indices[j];
+	dec_crit_indices[j]=t;
+      }
+    }
+  }
+
+  // copy table
+  for (i=0;i<tablesize;i++){
+    rtable[i].period_ns=reserves_specs_table[dec_crit_indices[i]].period_sec * 1000000000L +
+      reserves_specs_table[dec_crit_indices[i]].period_nsec;
+    rtable[i].exectime_ns = reserves_specs_table[dec_crit_indices[i]].exec_sec * 1000000000L +
+      reserves_specs_table[dec_crit_indices[i]].exec_nsec;
+    rtable[i].nominal_exectime_ns=reserves_specs_table[dec_crit_indices[i]].nominal_exec_sec * 1000000000L +
+      reserves_specs_table[dec_crit_indices[i]].nominal_exec_nsec;
+    rtable[i].exectime_in_rm_ns=0;
+    rtable[i].pid=0;
+    rtable[i].criticality=reserves_specs_table[dec_crit_indices[i]].criticality;
+  }
+
+  // try admission
+  admissible=1;
+  for (i=0;i<tablesize && admissible ;i++){
+    admissible = admissible &&
+      admit(rtable,tablesize,&rtable[i],&Z);
+    if (admissible){
+      reserves_specs_table[dec_crit_indices[i]].zsinstant_sec = (long)(Z / 1000000000L);
+      reserves_specs_table[dec_crit_indices[i]].zsinstant_nsec = (long)(Z % 1000000000L);
+    }
+  }
+
+  // free resources
+  free(dec_crit_indices);
+  free(rtable);
+  
+  return admissible;
+}
+
 
 /*********************************************************************/
 /*@requires fp1 && fp2 && fp31 && fp32 && zsrm1 && zsrm2 && zsrm3 && zsrm4;

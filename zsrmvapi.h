@@ -113,6 +113,19 @@ struct api_call {
   unsigned long long *pwcet;
 };
 
+struct reserve_spec_t {
+  long period_sec;
+  long period_nsec;
+  long zsinstant_sec;
+  long zsinstant_nsec;
+  long exec_sec;
+  long exec_nsec;
+  long nominal_exec_sec;
+  long nominal_exec_nsec;
+  int criticality;
+};
+
+int zsv_is_admissible(struct reserve_spec_t *reserves_specs_table, int tablesize);
 int zsv_get_wcet_ns(int schedfd, int rid, unsigned long long *pwcet);
 int zsv_get_acet_ns(int schedfd, int rid, unsigned long long *pacet);
 void busy_timestamped(long millis, unsigned long long tsbuffer[], 

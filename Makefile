@@ -38,9 +38,10 @@
 #DM-0000891
 
 TARGET = zsrmmv
-OBJS =  zsrmv.o
+OBJS =  zsrmv.o admission.o
 UNAME_P := $(shell uname -p)
 
+#INCDIR = ../include/
 ifeq ($(UNAME_P),x86_64)
 INCDIR = /lib/modules/$(shell uname -r)/build/include
 else
@@ -61,6 +62,7 @@ ifneq ($(KERNELRELEASE),)
 # Otherwise we were called directly from the command line;
 # invoke the kernel build system
 else
+#	KERNELDIR ?= /home/dionisio/LinuxRK/drone-rk/kernel/linux-2.6.27-rk
 	ifeq ($(UNAME_P),x86_64)
 		KERNELDIR ?= /lib/modules/$(shell uname -r)/build
 	else

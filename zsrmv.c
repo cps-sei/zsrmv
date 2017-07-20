@@ -8,6 +8,8 @@
 #include <linux/clocksource.h>
 #include <linux/timekeeping.h>
 
+#include "zsrmv.h"
+
 #include "zsrmvapi.h"
 
 /*********************************************************************/
@@ -125,87 +127,92 @@ int zsrmcall=-1;
 struct task_struct *sched_task;
 struct task_struct *active_task;
 
+/**
+ *   MOVED TO zsrmv.h to improve modularity
+ */
 
-struct zs_timer{
-  timer_t tid;
-  int rid;
-  int timer_type;
-  struct timespec expiration;
-  unsigned long long absolute_expiration_ns;
-  struct hrtimer kernel_timer;
-  struct zs_timer *next;
+/* struct zs_timer{ */
+/*   timer_t tid; */
+/*   int rid; */
+/*   int timer_type; */
+/*   struct timespec expiration; */
+/*   unsigned long long absolute_expiration_ns; */
+/*   struct hrtimer kernel_timer; */
+/*   struct zs_timer *next; */
 
-#ifdef STAC_FRAMAC_STUBS
-  //-- ghost variable to indicate whether the timer is armed and the
-  //-- time (relative to point of arming) when it will go off
-  int stac_armed;
-  unsigned long long stac_expiration_ns;
-  enum hrtimer_restart (*stac_handler)(struct hrtimer *timer);
-#endif
-};
+/* #ifdef STAC_FRAMAC_STUBS */
+/*   //-- ghost variable to indicate whether the timer is armed and the */
+/*   //-- time (relative to point of arming) when it will go off */
+/*   int stac_armed; */
+/*   unsigned long long stac_expiration_ns; */
+/*   enum hrtimer_restart (*stac_handler)(struct hrtimer *timer); */
+/* #endif */
+/* }; */
 
-struct reserve {
-  struct pid_namespace *task_namespace;
-  pid_t  pid;
-  int rid;
-  unsigned long long start_ns;
-  unsigned long long stop_ns;
-  unsigned long long current_exectime_ns;
-  unsigned long long exectime_ns;
-  unsigned long long nominal_exectime_ns;
+/* struct reserve { */
+/*   struct pid_namespace *task_namespace; */
+/*   pid_t  pid; */
+/*   int rid; */
+/*   unsigned long long start_ns; */
+/*   unsigned long long stop_ns; */
+/*   unsigned long long current_exectime_ns; */
+/*   unsigned long long exectime_ns; */
+/*   unsigned long long nominal_exectime_ns; */
 
-  unsigned long long start_ticks;
-  unsigned long long stop_ticks;
-  unsigned long long current_exectime_ticks;
-  unsigned long long exectime_ticks;
-  unsigned long long nominal_exectime_ticks;
-  unsigned long long worst_exectime_ticks;
-  unsigned long long avg_exectime_ticks;
-  unsigned long avg_exectime_ticks_measurements;
+/*   unsigned long long start_ticks; */
+/*   unsigned long long stop_ticks; */
+/*   unsigned long long current_exectime_ticks; */
+/*   unsigned long long exectime_ticks; */
+/*   unsigned long long nominal_exectime_ticks; */
+/*   unsigned long long worst_exectime_ticks; */
+/*   unsigned long long avg_exectime_ticks; */
+/*   unsigned long avg_exectime_ticks_measurements; */
 
-  unsigned int num_period_wakeups;
+/*   unsigned int num_period_wakeups; */
 
-  unsigned long num_enforcements;
-  unsigned long num_wfnp;
-  unsigned long num_wait_release;
-  unsigned int non_periodic_wait;
-  unsigned int end_of_period_marked;
+/*   unsigned long num_enforcements; */
+/*   unsigned long num_wfnp; */
+/*   unsigned long num_wait_release; */
+/*   unsigned int non_periodic_wait; */
+/*   unsigned int end_of_period_marked; */
 
-#ifdef STAC_FRAMAC_STUBS
-  //-- ghost variables we use to model the real execution time of a
-  //-- job and start time of last job fragment
-  unsigned long long real_exectime_ns;
-  unsigned long long real_start_ns;
-#endif
+/* #ifdef STAC_FRAMAC_STUBS */
+/*   //-- ghost variables we use to model the real execution time of a */
+/*   //-- job and start time of last job fragment */
+/*   unsigned long long real_exectime_ns; */
+/*   unsigned long long real_start_ns; */
+/* #endif */
 
-  int enforcement_type;
-  struct timespec period;
-  struct timespec zsinstant;
-  unsigned long long period_ns;
-  unsigned long long period_ticks;
-  struct timespec execution_time;
-  struct timespec nominal_execution_time;
-  int priority;
-  int criticality;
-  int in_critical_mode;
-  int enforced;
-  int bound_to_cpu;
-  struct zs_timer period_timer;
-  struct zs_timer enforcement_timer;
-  struct zs_timer zero_slack_timer;
-  struct reserve *next;
-  struct reserve *rm_next;
-  struct reserve *crit_next;
-  struct reserve *crit_block_next;
-  int request_stop;
-  int enforcement_signal_captured;
-  int enforcement_signal_receiver_pid;
-  int enforcement_signo;
-  int attached;
+/*   int enforcement_type; */
+/*   struct timespec period; */
+/*   struct timespec zsinstant; */
+/*   unsigned long long period_ns; */
+/*   unsigned long long period_ticks; */
+/*   struct timespec execution_time; */
+/*   struct timespec nominal_execution_time; */
+/*   int priority; */
+/*   int criticality; */
+/*   int in_critical_mode; */
+/*   int enforced; */
+/*   int bound_to_cpu; */
+/*   struct zs_timer period_timer; */
+/*   struct zs_timer enforcement_timer; */
+/*   struct zs_timer zero_slack_timer; */
+/*   struct reserve *next; */
+/*   struct reserve *rm_next; */
+/*   struct reserve *crit_next; */
+/*   struct reserve *crit_block_next; */
+/*   int request_stop; */
+/*   int enforcement_signal_captured; */
+/*   int enforcement_signal_receiver_pid; */
+/*   int enforcement_signo; */
+/*   int attached; */
 
-  // Some debugging variables
-  int start_period;
-} reserve_table[MAX_RESERVES];
+/*   // Some debugging variables */
+/*   int start_period; */
+/* } reserve_table[MAX_RESERVES]; */
+
+struct reserve reserve_table[MAX_RESERVES];
 
 // only tasks with higher or equal criticality than sys_criticality are allowed
 // to run
@@ -966,25 +973,25 @@ float compute_total_utilization(void)
   @ensures fp31 && fp32 && zsrm1 && zsrm2 && zsrm3 && zsrm4 && zsrm7;
 */
 /*********************************************************************/
-int admit(struct reserve *r)
-{
-  //Dio: cannot use floating point in kernel -- disable for now
+/* int admit(struct reserve *r) */
+/* { */
+/*   //Dio: cannot use floating point in kernel -- disable for now */
 
-  /*
-  float u = ((r->execution_time.tv_sec*1000000000L+r->execution_time.tv_nsec) / (r->period_ns *1.0f));
-  float ut =  compute_total_utilization();
+/*   /\* */
+/*   float u = ((r->execution_time.tv_sec*1000000000L+r->execution_time.tv_nsec) / (r->period_ns *1.0f)); */
+/*   float ut =  compute_total_utilization(); */
 
-  if (u+ut<=0.69f){
-    printk("admit():total utilization:%f\n",(u+ut));
-    // schedulable
-    return 1;
-  }
-  // not schedulable
-  return 0;
-  */
+/*   if (u+ut<=0.69f){ */
+/*     printk("admit():total utilization:%f\n",(u+ut)); */
+/*     // schedulable */
+/*     return 1; */
+/*   } */
+/*   // not schedulable */
+/*   return 0; */
+/*   *\/ */
 
-  return 1;
-}
+/*   return 1; */
+/* } */
 
 /*********************************************************************/
 /*@requires fp11 && fp12 && fp13;
@@ -2762,6 +2769,7 @@ static ssize_t zsrm_write
   struct api_call call;
   unsigned long flags;
   unsigned long long wcet;
+  unsigned long long Z;
   
   /* copy data to kernel buffer. */
   if (copy_from_user(&call, buf, count)) {
@@ -2854,6 +2862,8 @@ static ssize_t zsrm_write
       reserve_table[ret].nominal_exectime_ns = (call.nominal_exec_sec * 1000000000L) +
 	call.nominal_exec_nsec;
       reserve_table[ret].nominal_exectime_ticks = ns2ticks(reserve_table[ret].nominal_exectime_ns);
+
+      reserve_table[ret].zsinstant_ns = (call.zsinstant_sec * 1000000000L)+call.zsinstant_nsec;
       
       // verify if zero slack instant is the same as period set it to twice its value to ensure that it does not
       // have the possibility of triggering before the end of period (effectively disabling it).
@@ -2863,7 +2873,16 @@ static ssize_t zsrm_write
 	reserve_table[ret].zsinstant.tv_nsec *= 2;
       }
       
-      if (admit(&reserve_table[ret])){
+      if (admit(reserve_table, MAX_RESERVES, &reserve_table[ret],&Z)){
+	reserve_table[ret].zsinstant_ns = Z;
+	// for protection
+	if (reserve_table[ret].zsinstant_ns == reserve_table[ret].period_ns){
+	  reserve_table[ret].zsinstant_ns *= 2;
+	}
+
+	reserve_table[ret].zsinstant.tv_sec =  reserve_table[ret].zsinstant_ns / 1000000000L;
+	reserve_table[ret].zsinstant.tv_nsec = reserve_table[ret].zsinstant_ns % 1000000000L;
+	
 	add_rm_queue(&reserve_table[ret]);
 #ifdef __ZS_DEBUG__	
 	printk("zsrmv.create_rsv: rid(%d) period: sec(%ld) nsec(%ld) zs: sec(%ld), nsec(%ld) \n",
