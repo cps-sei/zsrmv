@@ -2,10 +2,10 @@
 #include <stdio.h>
 #include <jni.h>
 #include <zsrmvapi.h>
-#include "ZSRMVSched.h"
+#include "edu_cmu_sei_ZSRM_ZSRMVScheduler.h"
 
 
-JNIEXPORT jboolean JNICALL Java_ZSRMVSched_isAdmissible
+JNIEXPORT jboolean JNICALL Java_edu_cmu_sei_ZSRM_ZSRMVScheduler_isAdmissible
 (JNIEnv *env, jobject self, jobjectArray rsvarray){
   int i;
   jint size;
@@ -26,7 +26,7 @@ JNIEXPORT jboolean JNICALL Java_ZSRMVSched_isAdmissible
   int error;
 
   // load class
-  zsrmvRsvClass = (*env)->FindClass(env,"ZSRMVReserve");
+  zsrmvRsvClass = (*env)->FindClass(env,"edu/cmu/sei/ZSRM/ZSRMVReserve");
   if (zsrmvRsvClass == NULL){
     printf("could not load ZSRMVReserve java class\n");
     return JNI_FALSE;

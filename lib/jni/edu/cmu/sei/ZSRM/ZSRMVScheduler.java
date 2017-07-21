@@ -1,13 +1,19 @@
-public class ZSRMVSched{
+package edu.cmu.sei.ZSRM;
+
+public class ZSRMVScheduler{
     static {
-	System.loadLibrary("zsrmvsched");
+	try {
+	    cz.adamh.utils.NativeUtils.loadLibraryFromJar("/lib/libzsrmvsched.so");
+	} catch(Exception e){
+	    e.printStackTrace();
+	}
     }
 
-    private native boolean isAdmissible(ZSRMVReserve[] reserveSet);
+    public native boolean isAdmissible(ZSRMVReserve[] reserveSet);
 
     // for testing
     public static void main(String[] args){
-	ZSRMVSched sched = new ZSRMVSched();
+	ZSRMVScheduler sched = new ZSRMVScheduler();
 	ZSRMVReserve rsvtable[] = new ZSRMVReserve[2];
 
 	rsvtable[0] = new ZSRMVReserve(0,   // period sec

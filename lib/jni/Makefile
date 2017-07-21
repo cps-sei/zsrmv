@@ -1,17 +1,23 @@
-all:	ZSRMVSched.class ZSRMVReserve.class libzsrmvsched.so
+all:	ZSRMVScheduler.jar
 
 clean:
-	rm -f ZSRMVSched.class ZSRMVReserve.class libzsrmvsched.so ZSRMVSched.h
+	rm -f edu/cmu/sei/ZSRM/ZSRMVScheduler.class edu/cmu/sei/ZSRM/ZSRMVReserve.class edu_cmu_sei_ZSRM_ZSRMVScheduler.h cz/adamh/utils/NativeUtils.class lib/libzsrmvsched.so ZSRMVScheduler.jar
 	rm -f *~
 
-ZSRMVReserve.class:	ZSRMVReserve.java
-	javac ZSRMVReserve.java
+ZSRMVScheduler.jar:	edu/cmu/sei/ZSRM/ZSRMVScheduler.class edu/cmu/sei/ZSRM/ZSRMVReserve.class ZSRMVScheduler.h cz/adamh/utils/NativeUtils.class lib/libzsrmvsched.so
+	jar -cvf ZSRMVScheduler.jar cz/* edu/* lib/*
 
-ZSRMVSched.class:	ZSRMVSched.java ZSRMVReserve.class
-	javac ZSRMVSched.java
+cz/adamh/utils/NativeUtils.class:	cz/adamh/utils/NativeUtils.java
+	javac cz/adamh/utils/NativeUtils.java
 
-ZSRMVSched.h:	ZSRMVSched.class
-	javah ZSRMVSched
+edu/cmu/sei/ZSRM/ZSRMVReserve.class:	edu/cmu/sei/ZSRM/ZSRMVReserve.java
+	javac edu/cmu/sei/ZSRM/ZSRMVReserve.java
 
-libzsrmvsched.so:	libzsrmvsched.c ZSRMVSched.h
-	gcc -shared libzsrmvsched.c -o libzsrmvsched.so -lzsv -L../ -I../../ -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -fPIC
+edu/cmu/sei/ZSRM/ZSRMVScheduler.class:	edu/cmu/sei/ZSRM/ZSRMVScheduler.java edu/cmu/sei/ZSRM/ZSRMVReserve.class cz/adamh/utils/NativeUtils.class
+	javac edu/cmu/sei/ZSRM/ZSRMVScheduler.java
+
+ZSRMVScheduler.h:	edu/cmu/sei/ZSRM/ZSRMVScheduler.class
+	javah edu.cmu.sei.ZSRM.ZSRMVScheduler
+
+lib/libzsrmvsched.so:	libzsrmvsched.c ZSRMVScheduler.h
+	gcc -shared libzsrmvsched.c -o lib/libzsrmvsched.so -lzsv -L../ -I../../ -I${JAVA_HOME}/include -I${JAVA_HOME}/include/linux -fPIC
