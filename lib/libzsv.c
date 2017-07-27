@@ -14,6 +14,8 @@
 
 #include "../zsrmv.h"
 #include "../zsrmvapi.h"
+#include "speed_params.h"
+
 
 #include <unistd.h>
 #include <sys/syscall.h>
@@ -130,7 +132,7 @@ int del_thraded_signal_handler_record(struct threaded_signal_handler_table_t *re
 // at frequency: 1500000 
 // #define IN_LOOP_ONE_MS 213788
 // Surface Book i7 at 2.1 GHz
-#define IN_LOOP_ONE_MS 289451
+//#define IN_LOOP_ONE_MS 289451
 #define NUM_IN_LOOPS_ONE_MS 1
 #define NUM_SILENT_ITERATIONS 10000
 //#define NUM_SILENT_ITERATIONS 100

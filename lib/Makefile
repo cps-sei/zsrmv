@@ -49,12 +49,12 @@ AR=ar
 LD=ld
 AS=as
 
-all:	libzsv.a
+all:	libzsv.a gen-speed-params
 
 clean:
-	rm -f libzsv.a libzsv.o admission.o
+	rm -f libzsv.a libzsv.o admission.o gen-speed-params *~
 
-libzsv.o:	libzsv.c #../zsrm.h
+libzsv.o:	libzsv.c speed_params.h
 	$(CC) -fPIC -c libzsv.c -o libzsv.o
 
 admission.o:	../admission.c
@@ -62,3 +62,6 @@ admission.o:	../admission.c
 
 libzsv.a:	libzsv.o admission.o
 	$(AR) -rcs libzsv.a libzsv.o admission.o
+
+gen-speed-params:	gen-speed-params.c libzsv.a
+	$(CC) -o gen-speed-params gen-speed-params.c -lzsv -L.
