@@ -1,4 +1,4 @@
-prefix=/home/dionisio/git/stac/zsrmvmodule
+prefix=${HOME}/git/public-zsrmv
 includedir=${prefix}
 libdir=${prefix}/lib
 
